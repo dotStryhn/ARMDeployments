@@ -1,0 +1,259 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "dnsZone": {
+            "type": "string",
+            "metadata": {
+                "description": "dnsZone"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "templateBaseURL": "https://raw.githubusercontent.com/dotStryhn/ARMTemplates/master/",
+        "defaultTemplateVersion": "v1.0",
+        "cnameRecordTemplateURL":   "[concat(variables('templateBaseURL'), 'Microsoft.Network/dnsZones/CNAME/',    variables('defaultTemplateVersion'), '/azuredeploy.json')]",
+        "dnsZoneTemplateURL":       "[concat(variables('templateBaseURL'), 'Microsoft.Network/dnsZones/',          variables('defaultTemplateVersion'), '/azuredeploy.json')]",
+        "mxRecordTemplateURL":      "[concat(variables('templateBaseURL'), 'Microsoft.Network/dnsZones/MX/',       variables('defaultTemplateVersion'), '/azuredeploy.json')]",
+        "srvRecordTemplateURL":     "[concat(variables('templateBaseURL'), 'Microsoft.Network/dnsZones/SRV/',      variables('defaultTemplateVersion'), '/azuredeploy.json')]",
+        "txtRecordTemplateURL":     "[concat(variables('templateBaseURL'), 'Microsoft.Network/dnsZones/TXT/',      variables('defaultTemplateVersion'), '/azuredeploy.json')]",
+
+        "splitAddress": "[split(parameters('dnsZone'),'.')]"
+
+    },
+    "resources": [
+        {
+            "name": "dnsZone",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('dnsZoneTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZone": {
+                        "value": "[parameters('dnsZone')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "cname-autodiscover",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "dnsZone"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('cnameRecordTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZone":{
+                        "value": "[parameters('dnsZone')]"
+                    },
+                    "cname": {
+                        "value": "autodiscover"
+                    },
+                    "cnameAlias":{
+                        "value": "autodiscover.outlook.com"
+                    }
+                }
+            }
+        },
+        {
+            "name": "cname-enterpriseenrollment",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "dnsZone"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('cnameRecordTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZone":{
+                        "value": "[parameters('dnsZone')]"
+                    },
+                    "cname": {
+                        "value": "enterpriseenrollment"
+                    },
+                    "cnameAlias":{
+                        "value": "enterpriseenrollment.manage.microsoft.com"
+                    }
+                }
+            }
+        },
+        {
+            "name": "cname-enterpriseregistration",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "dnsZone"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('cnameRecordTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZone":{
+                        "value": "[parameters('dnsZone')]"
+                    },
+                    "cname": {
+                        "value": "enterpriseregistration"
+                    },
+                    "cnameAlias":{
+                        "value": "enterpriseregistration.windows.net"
+                    }
+                }
+            }
+        },
+        {
+            "name": "cname-lyncdiscover",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "dnsZone"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('cnameRecordTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZone":{
+                        "value": "[parameters('dnsZone')]"
+                    },
+                    "cname": {
+                        "value": "lyncdiscover"
+                    },
+                    "cnameAlias":{
+                        "value": "webdir.online.lync.com"
+                    }
+                }
+            }
+        },
+        {
+            "name": "cname-sip",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "dnsZone"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('cnameRecordTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZone":{
+                        "value": "[parameters('dnsZone')]"
+                    },
+                    "cname": {
+                        "value": "sip"
+                    },
+                    "cnameAlias":{
+                        "value": "sipdir.online.lync.com"
+                    }
+                }
+            }
+        },
+        {
+            "name": "mx-at",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "dnsZone"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('mxRecordTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZone":{
+                        "value": "[parameters('dnsZone')]"
+                    },
+                    "mailExchange": {
+                        "value": "[concat(variables('splitAddress')[0],'-',variables('splitAddress')[1],'.mail.protection.outlook.com')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "srv-sipfederation",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "dnsZone"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('srvRecordTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZone":{
+                        "value": "[parameters('dnsZone')]"
+                    },
+                    "srvName": {
+                        "value": "_sipfederationtls._tcp"
+                    },
+                    "srvPriority": {
+                        "value": 100
+                    },
+                    "srvWeight": {
+                        "value": 1
+                    },
+                    "srvPort": {
+                        "value": 5061
+                    },
+                    "srvTarget": {
+                        "value": "sipfed.online.lync.com"
+                    }
+                }
+            }
+        },
+        {
+            "name": "txt-outlook",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "dnsZone"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('txtRecordTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZone": {
+                        "value": "[parameters('dnsZone')]"
+                    },
+                    "txtName": {
+                        "value": "@"
+                    },
+                    "txtValue": {
+                        "value": "v=spf1 include:spf.protection.outlook.com -all"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
