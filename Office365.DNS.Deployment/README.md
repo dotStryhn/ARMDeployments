@@ -8,7 +8,7 @@ Will deploy most of the needed DNS Records you need for a domain to be set up wi
 
 #### dnsZone
 
-Name of the dnsZone to deploy with DNS Records, for an Office 365. If used against and existing DNS Zone in Azure, it will add the Record.
+Name of the dnsZone to deploy with DNS Records, for an Office 365. If used against an existing DNS Zone in Azure, it will add the Record.
 
 ## Example on Deployments from PowerShell using this Template
 
