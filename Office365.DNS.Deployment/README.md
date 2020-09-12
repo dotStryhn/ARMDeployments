@@ -2,7 +2,7 @@
 
 ## Description
 
-Will deploy most of the needed DNS Records you need for a Domain to be set up with Office 365.
+Will deploy most of the needed DNS Records you need for a domain to be set up with Office 365.
 
 # Required Parameters
 
