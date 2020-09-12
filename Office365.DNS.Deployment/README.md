@@ -4,7 +4,7 @@
 
 Will deploy most of the needed DNS Records you need for a domain to be set up with Office 365.
 
-# Required Parameters
+## Required Parameters
 
 #### dnsZone
 
