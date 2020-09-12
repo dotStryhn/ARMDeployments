@@ -1,3 +1,3 @@
-# ARM Deployments
+# ARMDeployments
 
-My ARM Deployments
+My ARM (Azure Resource Manager) Deployments
