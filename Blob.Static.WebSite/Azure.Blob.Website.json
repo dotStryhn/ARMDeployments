@@ -1,0 +1,148 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "rootDomain": {
+            "type": "string",
+            "metadata": {
+                "description": "Root Domain, ie.: testdomain.com"
+            }
+        },
+        "domainPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Domain Prefix, ie.: www "
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "templateBaseURL": "https://raw.githubusercontent.com/dotStryhn/ARMTemplates/master/",
+        "defaultTemplateVersion": "v1.0",
+
+        "blobServicesTemplateURL":      "[concat(variables('templateBaseURL'), 'Microsoft.Storage/storageAccounts/blobServices/',               variables('defaultTemplateVersion'), '/azuredeploy.json')]",
+        "cnameRecordTemplateURL":       "[concat(variables('templateBaseURL'), 'Microsoft.Network/dnsZones/CNAME/',                             variables('defaultTemplateVersion'), '/azuredeploy.json')]",
+        "containerTemplateURL":         "[concat(variables('templateBaseURL'), 'Microsoft.Storage/storageAccounts/blobServices/containers/',    variables('defaultTemplateVersion'), '/azuredeploy.json')]",
+        "dnsZoneTemplateURL":           "[concat(variables('templateBaseURL'), 'Microsoft.Network/dnsZones/',                                   variables('defaultTemplateVersion'), '/azuredeploy.json')]",
+        "storageAccountTemplateURL":    "[concat(variables('templateBaseURL'), 'Microsoft.Storage/storageAccounts/',                            variables('defaultTemplateVersion'), '/azuredeploy.json')]",
+
+        "cnameVariable": "[concat(toLower(parameters('DomainPrefix')),toLower(replace(parameters('rootDomain'),'.','')),'.z6.web.core.windows.net')]",
+        "storageAccountName": "[concat(toLower(parameters('DomainPrefix')),toLower(replace(parameters('rootDomain'),'.','')))]"
+    },
+    "resources": [
+        {
+            "name": "dnsZone",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('dnsZoneTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZone": {
+                        "value": "[toLower(parameters('rootDomain'))]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "cnameRecord",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "dnsZone"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('cnameRecordTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "dnsZone": {
+                        "value": "[parameters('rootDomain')]"
+                    },
+                    "cname": {
+                        "value": "[parameters('domainPrefix')]"
+                    },
+                    "cnameAlias":{
+                        "value": "[variables('CNAMEVariable')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "storageAccount",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "dnsZone",
+                "cnameRecord"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('storageAccountTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName":{
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "storageAccountCustomDomain": {
+                        "value": "[concat(parameters('domainPrefix'), '.', parameters('rootDomain'))]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "blobServices",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "storageAccount"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('blobServicesTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName":{
+                        "value": "[variables('storageAccountName')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "webBlobContainer",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "dependsOn": [
+                "blobServices"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('containerTemplateURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "blobContainer": {
+                        "value": "$web"
+                    },
+                    "containerPublicAccess": {
+                        "value": "Blob"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
